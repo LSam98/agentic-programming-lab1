@@ -1,0 +1,13 @@
+# OS
+.DS_Store
+Thumbs.db
+# Editors
+.vscode/
+.idea/
+# Personal agent files (not shared)
+CLAUDE.local.md
+.claude/settings.local.json
+# Misc
+node_modules/
+*.log
+.env
