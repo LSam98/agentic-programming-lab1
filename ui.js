@@ -8,7 +8,7 @@ export function setupUI(renderer) {
     state.selected = id;
     const b = state.initial.find(item => item.id === id);
     form.hidden = !b;
-    if (b) for (const key of ['name', 'color', 'mass', 'radius', 'x', 'y', 'vx', 'vy']) form.elements[key].value = b[key];
+    if (b) for (const key of ['name', 'color', 'mass', 'radius', 'x', 'y', 'z', 'vx', 'vy', 'vz']) form.elements[key].value = b[key];
     $('form-error').textContent = ''; renderList();
   }
   function renderList() {
@@ -36,7 +36,7 @@ export function setupUI(renderer) {
   form.addEventListener('submit', e => {
     e.preventDefault(); if (state.phase !== 'ready') return;
     const values = { name: form.elements.name.value.trim(), color: form.elements.color.value };
-    for (const key of ['mass', 'radius', 'x', 'y', 'vx', 'vy']) values[key] = form.elements[key].value.trim() === '' ? NaN : Number(form.elements[key].value);
+    for (const key of ['mass', 'radius', 'x', 'y', 'z', 'vx', 'vy', 'vz']) values[key] = form.elements[key].value.trim() === '' ? NaN : Number(form.elements[key].value);
     const error = !values.name ? 'Give this body a name.' : validateBody(values);
     if (error) { $('form-error').textContent = error; return; }
     Object.assign(state.initial.find(b => b.id === state.selected), values);
@@ -44,7 +44,7 @@ export function setupUI(renderer) {
   });
   $('add').addEventListener('click', () => {
     const angle = state.initial.length * 2.4;
-    const b = body({ x: Math.round(Math.cos(angle) * 100), y: Math.round(Math.sin(angle) * 100) });
+    const b = body({ x: Math.round(Math.cos(angle) * 100), y: Math.round(Math.sin(angle) * 100), z: Math.round(Math.sin(angle * 0.7) * 60) });
     state.initial.push(b); changed('Body added. Set its properties and apply your changes.'); select(b.id);
   });
   $('delete').addEventListener('click', () => {
@@ -59,7 +59,7 @@ export function setupUI(renderer) {
   $('reset').addEventListener('click', () => { restore(); select(state.selected); refreshEditor(); notice('Reset complete. All initial body settings restored.'); });
   for (const button of document.querySelectorAll('[data-preset]')) button.addEventListener('click', () => {
     state.initial = preset(button.dataset.preset); restore(); select(state.initial[0].id); renderer.fit(state.bodies); refreshEditor();
-    notice(`${button.dataset.preset === 'orbit' ? 'Orbital duet' : 'Collision course'} loaded. Press Start simulation to launch.`);
+    notice(`${({ orbit: 'Orbital duet', spatial: 'Inclined orbit', collision: 'Collision course' })[button.dataset.preset]} loaded. Press Start simulation to launch.`);
   });
   $('speed').addEventListener('input', e => { state.speed = 2 ** Number(e.target.value); $('speed-label').textContent = `${state.speed}×`; });
   $('trails').addEventListener('change', e => { state.trailsEnabled = e.target.checked; });

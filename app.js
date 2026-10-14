@@ -24,13 +24,14 @@ function animate(now) {
         // Sample by simulation steps, never rendering frame rate. Bound memory.
         if (++trailTick % 10 === 0 && state.trailsEnabled) for (const b of state.bodies) {
           if (!state.trails.has(b.id)) state.trails.set(b.id, { color: b.color, points: [] });
-          const points = state.trails.get(b.id).points; points.push({ x: b.x, y: b.y });
+          const points = state.trails.get(b.id).points; points.push({ x: b.x, y: b.y, z: b.z });
           if (points.length > 2400) points.shift();
         }
         if (!state.bodies.length) { state.phase = 'ended'; state.accumulator = 0; ui.refreshEditor(); break; }
       }
     } catch (error) { state.phase = 'error'; state.accumulator = 0; notice(error.message); ui.refreshEditor(); }
   }
+  state.effects = state.effects.filter(e => now - e.at < 650);
   renderer.draw(state, now);
   if (now - lastStats > 80) { updateStats(); lastStats = now; }
   requestAnimationFrame(animate);

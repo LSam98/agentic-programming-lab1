@@ -18,10 +18,16 @@ function nextColor(id) {
 }
 export function body(settings = {}) {
   const id = ++serial;
-  return { id, name: `Body ${id}`, mass: 10, radius: 5, x: 0, y: 0, vx: 0, vy: 0,
+  return { id, name: `Body ${id}`, mass: 10, radius: 5, x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0,
     color: nextColor(id), ...settings };
 }
 export function preset(name) {
+  if (name === 'spatial') {
+    const bodies = preset('orbit');
+    // Rotate the circular orbital plane 45 degrees about X.
+    for (const b of bodies) { b.vz = b.vy / Math.sqrt(2); b.vy /= Math.sqrt(2); }
+    return bodies;
+  }
   if (name === 'collision') return [
     body({ name: 'Voyager A', mass: 40, radius: 12, x: -100, vx: 12, color: '#64d8ff' }),
     body({ name: 'Voyager B', mass: 40, radius: 12, x: 100, vx: -12, color: '#ff8a9c' }),
@@ -35,7 +41,7 @@ export function preset(name) {
   ];
 }
 export const state = {
-  initial: preset('orbit'), bodies: [], selected: null, phase: 'ready', time: 0,
+  initial: preset('spatial'), bodies: [], selected: null, phase: 'ready', time: 0,
   speed: 1, trailsEnabled: true, trails: new Map(), effects: [], accumulator: 0,
 };
 export function restore() {
