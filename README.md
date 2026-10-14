@@ -2,16 +2,14 @@
 
 A client-side 2D N-body gravity laboratory. Plain HTML, CSS, and JavaScript ES modules; no dependencies or build step. All paths are relative and ready for GitHub Pages.
 
-## Run locally from WSL
+## Run locally
 
-In a WSL terminal:
+ES modules need HTTP, so do not double-click `index.html`. From the repo folder:
 
-```bash
-cd /home/ariel/codex-test
-python3 -m http.server 8000 --bind 0.0.0.0
-```
+- Windows PowerShell: `python -m http.server 8000`
+- macOS / Linux / WSL: `python3 -m http.server 8000 --bind 0.0.0.0`
 
-Open **http://localhost:8000** in your Windows browser. Keep the terminal running; Ctrl+C stops the server. ES modules need HTTP, so do not double-click `index.html`. If port 8000 is busy, use 8001 in both places. If Windows localhost forwarding is disabled, run `hostname -I` in WSL and open `http://<WSL-IP>:8000`.
+Open **http://localhost:8000**. Keep the terminal running; Ctrl+C stops the server. If port 8000 is busy, use 8001. On WSL, if Windows localhost forwarding is disabled, run `hostname -I` in WSL and open `http://<WSL-IP>:8000`.
 
 ## Use
 
