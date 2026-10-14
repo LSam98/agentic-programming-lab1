@@ -13,7 +13,7 @@ Open **http://localhost:8000**. Keep the terminal running; Ctrl+C stops the serv
 
 ## Use
 
-Load **Orbital duet** or **Collision course**, then Start. Select a body, change properties, and **Apply initial conditions** to update the live canvas preview. Add/delete bodies while ready; reset to unlock editing after launch. Pause/resume, choose 0.25×–16× speed, toggle/clear trails, scroll to zoom, drag to pan, or Fit system. Fit only changes the view, never the physics. Bodies may leave the canvas.
+Load **Orbital duet** or **Collision course**, then Start. Select a body and change its properties; each valid edit applies instantly to the canvas preview, and an invalid value shows an error under its field without being saved. Add/delete bodies while ready; reset to unlock editing after launch. Pause/resume, choose 0.25×–16× speed, toggle/clear trails, scroll to zoom, drag to pan, or Fit system. Fit only changes the view, never the physics. Bodies may leave the canvas.
 
 ## Physics and units
 

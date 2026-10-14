@@ -1,16 +1,36 @@
 import { state, body, preset, restore } from './state.js';
 import { validateBody } from './physics.js';
 const $ = id => document.getElementById(id);
+const FIELDS = ['name', 'color', 'mass', 'radius', 'x', 'y', 'vx', 'vy'];
+// Display at most 6 significant digits; stored values keep full precision.
+const shown = (key, value) => typeof value === 'number' ? String(Number(value.toPrecision(6))) : value;
 export function notice(message) { $('notice').textContent = message; }
 export function setupUI(renderer) {
-  const form = $('editor');
+  const form = $('editor'), errors = {};
+  for (const key of FIELDS) {
+    const error = document.createElement('small'); error.id = `${key}-error`; error.style.cssText = 'display:block;color:#ff9cac;margin-top:4px;line-height:1.4';
+    form.elements[key].setAttribute('aria-describedby', error.id); form.elements[key].after(error); errors[key] = error;
+  }
+  function showError(key, message) { errors[key].textContent = message ?? ''; form.elements[key].setAttribute('aria-invalid', String(!!message)); }
   function select(id) {
     state.selected = id;
     const b = state.initial.find(item => item.id === id);
     form.hidden = !b;
-    if (b) for (const key of ['name', 'color', 'mass', 'radius', 'x', 'y', 'vx', 'vy']) form.elements[key].value = b[key];
-    $('form-error').textContent = ''; renderList();
+    for (const key of FIELDS) { if (b) form.elements[key].value = shown(key, b[key]); showError(key, null); }
+    renderList();
   }
+  // Edits apply live, one field at a time; an invalid field is never committed.
+  function edit(key) {
+    const b = state.initial.find(item => item.id === state.selected);
+    if (!b || state.phase !== 'ready') return;
+    const raw = form.elements[key].value;
+    const value = key === 'name' ? raw.trim() : key === 'color' ? raw : raw.trim() === '' ? NaN : Number(raw);
+    // The stored body is always valid, so any error comes from this field.
+    const error = key === 'name' ? (value ? null : 'Give this body a name.') : validateBody({ ...b, [key]: value });
+    showError(key, error); if (error) return;
+    b[key] = value; restore(); renderList(); updateStats();
+  }
+  for (const key of FIELDS) for (const type of ['input', 'change']) form.elements[key].addEventListener(type, () => edit(key));
   function renderList() {
     $('body-list').replaceChildren();
     for (const b of state.initial) {
@@ -18,7 +38,7 @@ export function setupUI(renderer) {
       button.disabled = state.phase !== 'ready'; button.setAttribute('aria-pressed', String(state.selected === b.id));
       const dot = document.createElement('span'); dot.className = 'body-dot'; dot.style.background = b.color;
       const info = document.createElement('span'), name = document.createElement('b'), sub = document.createElement('small');
-      name.textContent = b.name; sub.textContent = `${b.mass} M · ${b.radius} L radius`; info.append(name, sub);
+      name.textContent = b.name; sub.textContent = `${shown('mass', b.mass)} M · ${shown('radius', b.radius)} L radius`; info.append(name, sub);
       const arrow = document.createElement('span'); arrow.textContent = '›'; button.append(dot, info, arrow);
       button.addEventListener('click', () => select(b.id)); $('body-list').append(button);
     }
@@ -33,19 +53,10 @@ export function setupUI(renderer) {
     renderList(); updateStats();
   }
   function changed(message) { restore(); refreshEditor(); notice(message); }
-  form.addEventListener('submit', e => {
-    e.preventDefault(); if (state.phase !== 'ready') return;
-    const values = { name: form.elements.name.value.trim(), color: form.elements.color.value };
-    for (const key of ['mass', 'radius', 'x', 'y', 'vx', 'vy']) values[key] = form.elements[key].value.trim() === '' ? NaN : Number(form.elements[key].value);
-    const error = !values.name ? 'Give this body a name.' : validateBody(values);
-    if (error) { $('form-error').textContent = error; return; }
-    Object.assign(state.initial.find(b => b.id === state.selected), values);
-    $('form-error').textContent = ''; changed('Initial conditions saved. The canvas shows your updated system.');
-  });
   $('add').addEventListener('click', () => {
     const angle = state.initial.length * 2.4;
     const b = body({ x: Math.round(Math.cos(angle) * 100), y: Math.round(Math.sin(angle) * 100) });
-    state.initial.push(b); changed('Body added. Set its properties and apply your changes.'); select(b.id);
+    state.initial.push(b); changed('Body added. Edit its properties; changes apply instantly.'); select(b.id);
   });
   $('delete').addEventListener('click', () => {
     state.initial = state.initial.filter(b => b.id !== state.selected); state.selected = null;
